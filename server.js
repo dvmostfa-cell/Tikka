@@ -12,9 +12,18 @@ const PDFDocument = require('pdfkit');
 const app = express();
 const PORT = Number(process.env.PORT || 3000);
 const ROOT = __dirname;
-const DATA = path.join(ROOT,'data');
-const UPLOADS = path.join(ROOT,'uploads');
-for (const d of [DATA,UPLOADS]) fs.mkdirSync(d,{recursive:true});
+
+// Netlify Functions filesystem is read-only except for /tmp
+const RUNTIME_ROOT = process.env.NETLIFY
+  ? '/tmp/tikka'
+  : ROOT;
+
+const DATA = path.join(RUNTIME_ROOT, 'data');
+const UPLOADS = path.join(RUNTIME_ROOT, 'uploads');
+
+for (const d of [DATA, UPLOADS]) {
+  fs.mkdirSync(d, { recursive: true });
+}
 const files = { users:path.join(DATA,'users.json'), orders:path.join(DATA,'orders.json'), messages:path.join(DATA,'messages.json') };
 for (const f of Object.values(files)) if (!fs.existsSync(f)) fs.writeFileSync(f,'[]');
 const SECRET = process.env.JWT_SECRET || 'tikka-dev-secret-change-me';
