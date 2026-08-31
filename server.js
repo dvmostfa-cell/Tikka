@@ -14,9 +14,12 @@ const PORT = Number(process.env.PORT || 3000);
 const ROOT = __dirname;
 
 // Netlify Functions filesystem is read-only except for /tmp
-const RUNTIME_ROOT = process.env.NETLIFY
-  ? '/tmp/tikka'
-  : ROOT;
+const RUNTIME_ROOT =
+  process.env.NETLIFY ||
+  process.env.NETLIFY_DEV ||
+  process.env.AWS_LAMBDA_FUNCTION_NAME
+    ? '/tmp/tikka'
+    : ROOT;
 
 const DATA = path.join(RUNTIME_ROOT, 'data');
 const UPLOADS = path.join(RUNTIME_ROOT, 'uploads');
