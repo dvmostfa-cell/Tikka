@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tikka — لوحة التحكم</title>
+
+<style>
+*{box-sizing:border-box}
+body{
+    margin:0;
+    font-family:Arial,"Tahoma",sans-serif;
+    background:
+      radial-gradient(circle at 20% 20%,rgba(255,120,0,.12),transparent 30%),
+      radial-gradient(circle at 80% 80%,rgba(255,40,100,.10),transparent 30%),
+      #08090d;
+    color:#fff;
+    min-height:100vh;
+}
+
+header{
+    position:sticky;
+    top:0;
+    z-index:20;
+    padding:18px 25px;
+    background:rgba(10,11,16,.82);
+    backdrop-filter:blur(20px);
+    border-bottom:1px solid rgba(255,255,255,.08);
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+}
+
+.logo{
+    font-size:28px;
+    font-weight:900;
+    letter-spacing:2px;
+    background:linear-gradient(90deg,#ff7a00,#ff315f,#a855f7);
+    -webkit-background-clip:text;
+    color:transparent;
+}
+
+.logout{
+    border:0;
+    padding:11px 18px;
+    border-radius:12px;
+    background:#ff315f;
+    color:white;
+    font-weight:bold;
+    cursor:pointer;
+}
+
+.container{
+    max-width:1400px;
+    margin:auto;
+    padding:30px 20px;
+}
+
+.login{
+    max-width:430px;
+    margin:100px auto;
+    padding:35px;
+    border-radius:25px;
+    background:rgba(255,255,255,.06);
+    border:1px solid rgba(255,255,255,.1);
+    box-shadow:0 25px 80px rgba(0,0,0,.4);
+}
+
+.login h1{
+    margin-top:0;
+    text-align:center;
+}
+
+input,select{
+    width:100%;
+    padding:14px;
+    margin:8px 0;
+    border-radius:12px;
+    border:1px solid rgba(255,255,255,.12);
+    background:#12141b;
+    color:white;
+    outline:none;
+}
+
+button{
+    cursor:pointer;
+}
+
+.login button{
+    width:100%;
+    margin-top:10px;
+    padding:14px;
+    border:0;
+    border-radius:12px;
+    background:linear-gradient(90deg,#ff7a00,#ff315f);
+    color:white;
+    font-weight:bold;
+}
+
+#error{
+    color:#ff5d7a;
+    margin-top:12px;
+    text-align:center;
+}
+
+.dashboard{
+    display:none;
+}
+
+.stats{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:18px;
+    margin-bottom:30px;
+}
+
+.card{
+    padding:25px;
+    border-radius:22px;
+    background:linear-gradient(145deg,rgba(255,255,255,.08),rgba(255,255,255,.025));
+    border:1px solid rgba(255,255,255,.08);
+    box-shadow:0 15px 50px rgba(0,0,0,.25);
+    transition:.3s;
+}
+
+.card:hover{
+    transform:translateY(-5px) scale(1.01);
+}
+
+.card small{
+    color:#aaa;
+}
+
+.card strong{
+    display:block;
+    font-size:30px;
+    margin-top:10px;
+}
+
+.section{
+    margin-top:25px;
+    padding:25px;
+    border-radius:22px;
+    background:rgba(255,255,255,.045);
+    border:1px solid rgba(255,255,255,.08);
+    overflow:auto;
+}
+
+.section h2{
+    margin-top:0;
+}
+
+table{
+    width:100%;
+    border-collapse:collapse;
+    min-width:950px;
+}
+
+th,td{
+    padding:14px 10px;
+    border-bottom:1px solid rgba(255,255,255,.08);
+    text-align:right;
+}
+
+th{
+    color:#ff9b50;
+}
+
+.status{
+    padding:6px 10px;
+    border-radius:20px;
+    background:#242630;
+    display:inline-block;
+    font-size:12px;
+}
+
+.action{
+    padding:8px 11px;
+    border:0;
+    border-radius:9px;
+    background:#272a35;
+    color:white;
+    margin:2px;
+}
+
+.action:hover{
+    background:#ff315f;
+}
+
+.refresh{
+    padding:10px 16px;
+    border:0;
+    border-radius:10px;
+    background:#ff7a00;
+    color:#fff;
+    font-weight:bold;
+}
+
+@media(max-width:900px){
+    .stats{
+        grid-template-columns:repeat(2,1fr);
+    }
+}
+
+@media(max-width:600px){
+    .stats{
+        grid-template-columns:1fr;
+    }
+
+    header{
+        padding:15px;
+    }
+
+    .container{
+        padding:15px;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<header>
+    <div class="logo">TIKKA ADMIN</div>
+    <button class="logout" onclick="logout()">تسجيل الخروج</button>
+</header>
+
+<div id="loginBox" class="login">
+    <h1>🔐 دخول المدير</h1>
+
+    <input id="email" type="email" placeholder="البريد الإلكتروني">
+
+    <input id="password" type="password" placeholder="كلمة المرور">
+
+    <button onclick="login()">دخول لوحة التحكم</button>
+
+    <div id="error"></div>
+</div>
+
+<div id="dashboard" class="dashboard">
+
+<div class="container">
+
+    <div class="stats">
+
+        <div class="card">
+            <small>📦 إجمالي الطلبات</small>
+            <strong id="ordersCount">0</strong>
+        </div>
+
+        <div class="card">
+            <small>⏳ الطلبات المعلقة</small>
+            <strong id="pendingCount">0</strong>
+        </div>
+
+        <div class="card">
+            <small>💰 الإيرادات</small>
+            <strong id="revenue">0</strong>
+        </div>
+
+        <div class="card">
+            <small>👥 العملاء</small>
+            <strong id="customers">0</strong>
+        </div>
+
+    </div>
+
+    <div class="section">
+
+        <h2>
+            📦 الطلبات
+            <button class="refresh" onclick="loadAll()">تحديث</button>
+        </h2>
+
+        <table>
+
+            <thead>
+                <tr>
+                    <th>رقم الطلب</th>
+                    <th>العميل</th>
+                    <th>الهاتف</th>
+                    <th>التوصيل</th>
+                    <th>الدفع</th>
+                    <th>المبلغ</th>
+                    <th>الحالة</th>
+                    <th>إجراءات</th>
+                </tr>
+            </thead>
+
+            <tbody id="ordersTable"></tbody>
+
+        </table>
+
+    </div>
+
+    <div class="section">
+
+        <h2>💬 رسائل العملاء</h2>
+
+        <table>
+
+            <thead>
+                <tr>
+                    <th>الاسم</th>
+                    <th>الهاتف</th>
+                    <th>الرسالة</th>
+                    <th>التاريخ</th>
+                </tr>
+            </thead>
+
+            <tbody id="messagesTable"></tbody>
+
+        </table>
+
+    </div>
+
+</div>
+
+</div>
+
+<script>
+
+const API = "/api";
+
+let token = localStorage.getItem("tikka_admin_token");
+
+function headers(){
+    return {
+        "Content-Type":"application/json",
+        "Authorization":"Bearer " + token
+    };
+}
+
+async function login(){
+
+    const email =
+        document.getElementById("email").value.trim();
+
+    const password =
+        document.getElementById("password").value;
+
+    const error =
+        document.getElementById("error");
+
+    error.textContent = "";
+
+    try{
+
+        const response = await fetch(API + "/auth/login",{
+            method:"POST",
+            headers:{
+                "Content-Type":"application/json"
+            },
+            body:JSON.stringify({
+                email,
+                password
+            })
+        });
+
+        const data = await response.json();
+
+        if(!response.ok || !data.success){
+            error.textContent =
+                data.message || "فشل تسجيل الدخول";
+            return;
+        }
+
+        if(data.user.role !== "admin"){
+            error.textContent =
+                "هذا الحساب ليس حساب مدير";
+            return;
+        }
+
+        token = data.token;
+
+        localStorage.setItem(
+            "tikka_admin_token",
+            token
+        );
+
+        showDashboard();
+
+    }catch(e){
+
+        error.textContent =
+            "تعذر الاتصال بالسيرفر";
+
+    }
+}
+
+function showDashboard(){
+
+    document.getElementById("loginBox").style.display="none";
+
+    document.getElementById("dashboard").style.display="block";
+
+    loadAll();
+}
+
+function logout(){
+
+    localStorage.removeItem("tikka_admin_token");
+
+    token=null;
+
+    location.reload();
+}
+
+async function loadStats(){
+
+    const response =
+        await fetch(API + "/admin/stats",{
+            headers:headers()
+        });
+
+    if(response.status===401 || response.status===403){
+        logout();
+        return;
+    }
+
+    const data=await response.json();
+
+    if(!data.success)return;
+
+    document.getElementById("ordersCount").textContent =
+        Number(data.stats.orders).toLocaleString();
+
+    document.getElementById("pendingCount").textContent =
+        Number(data.stats.pending).toLocaleString();
+
+    document.getElementById("revenue").textContent =
+        Number(data.stats.revenue).toLocaleString() + " SYP";
+
+    document.getElementById("customers").textContent =
+        Number(data.stats.customers).toLocaleString();
+}
+
+async function loadOrders(){
+
+    const response =
+        await fetch(API + "/admin/orders",{
+            headers:headers()
+        });
+
+    if(response.status===401 || response.status===403){
+        logout();
+        return;
+    }
+
+    const data=await response.json();
+
+    if(!data.success)return;
+
+    const tbody =
+        document.getElementById("ordersTable");
+
+    tbody.innerHTML="";
+
+    for(const order of data.orders){
+
+        const tr=document.createElement("tr");
+
+        tr.innerHTML=`
+
+            <td>${escapeHtml(order.orderId)}</td>
+
+            <td>${escapeHtml(order.customerName)}</td>
+
+            <td>${escapeHtml(order.phone)}</td>
+
+            <td>${escapeHtml(order.delivery)}</td>
+
+            <td>
+                ${escapeHtml(order.payment)}
+                <br>
+                <span class="status">
+                    ${escapeHtml(order.paymentStatus)}
+                </span>
+            </td>
+
+            <td>
+                ${Number(order.total||0).toLocaleString()} SYP
+            </td>
+
+            <td>
+                <span class="status">
+                    ${escapeHtml(order.status)}
+                </span>
+            </td>
+
+            <td>
+
+                <button
+                    class="action"
+                    onclick="changeStatus('${order.orderId}','confirmed')">
+                    تأكيد
+                </button>
+
+                <button
+                    class="action"
+                    onclick="changeStatus('${order.orderId}','preparing')">
+                    تجهيز
+                </button>
+
+                <button
+                    class="action"
+                    onclick="changeStatus('${order.orderId}','out_for_delivery')">
+                    توصيل
+                </button>
+
+                <button
+                    class="action"
+                    onclick="changeStatus('${order.orderId}','delivered')">
+                    تم التسليم
+                </button>
+
+                <button
+                    class="action"
+                    onclick="verifyPayment('${order.orderId}')">
+                    تأكيد الدفع
+                </button>
+
+                <button
+                    class="action"
+                    onclick="openPDF('${order.orderId}')">
+                    PDF
+                </button>
+
+            </td>
+        `;
+
+        tbody.appendChild(tr);
+    }
+}
+
+async function loadMessages(){
+
+    const response =
+        await fetch(API + "/admin/messages",{
+            headers:headers()
+        });
+
+    if(!response.ok)return;
+
+    const data=await response.json();
+
+    if(!data.success)return;
+
+    const tbody =
+        document.getElementById("messagesTable");
+
+    tbody.innerHTML="";
+
+    for(const message of data.messages){
+
+        const tr=document.createElement("tr");
+
+        tr.innerHTML=`
+
+            <td>${escapeHtml(message.name)}</td>
+
+            <td>${escapeHtml(message.phone)}</td>
+
+            <td>${escapeHtml(message.message)}</td>
+
+            <td>
+                ${new Date(message.createdAt).toLocaleString("ar")}
+            </td>
+
+        `;
+
+        tbody.appendChild(tr);
+    }
+}
+
+async function changeStatus(orderId,status){
+
+    const response =
+        await fetch(
+            API + "/orders/" +
+            encodeURIComponent(orderId) +
+            "/status",
+            {
+                method:"PATCH",
+                headers:headers(),
+                body:JSON.stringify({status})
+            }
+        );
+
+    const data=await response.json();
+
+    if(!data.success){
+
+        alert(data.message || "تعذر تغيير الحالة");
+
+        return;
+    }
+
+    await loadAll();
+}
+
+async function verifyPayment(orderId){
+
+    const response =
+        await fetch(
+            API + "/orders/" +
+            encodeURIComponent(orderId) +
+            "/payment",
+            {
+                method:"PATCH",
+                headers:headers(),
+                body:JSON.stringify({
+                    paymentStatus:"تم التحقق"
+                })
+            }
+        );
+
+    const data=await response.json();
+
+    if(!data.success){
+
+        alert(data.message || "تعذر تحديث الدفع");
+
+        return;
+    }
+
+    await loadAll();
+}
+
+function openPDF(orderId){
+
+    const url =
+        API +
+        "/orders/" +
+        encodeURIComponent(orderId) +
+        "/pdf";
+
+    window.open(url,"_blank");
+
+}
+
+function escapeHtml(value){
+
+    return String(value ?? "")
+        .replaceAll("&","&amp;")
+        .replaceAll("<","&lt;")
+        .replaceAll(">","&gt;")
+        .replaceAll('"',"&quot;")
+        .replaceAll("'","&#039;");
+}
+
+async function loadAll(){
+
+    await Promise.all([
+        loadStats(),
+        loadOrders(),
+        loadMessages()
+    ]);
+
+}
+
+if(token){
+
+    showDashboard();
+
+}
+
+</script>
+
+</body>
+</html>
