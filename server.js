@@ -114,9 +114,32 @@ app.get('/api/orders/:id/pdf',auth,admin,(req,res)=>{
 app.use((req,res)=>res.status(404).json({success:false,message:'المسار غير موجود'}));
 app.use((err,req,res,next)=>{console.error(err);res.status(500).json({success:false,message:'حدث خطأ في السيرفر'});});
 
-(async()=>{
-  const users=read('users');
-  const adminEmail=(process.env.ADMIN_EMAIL||'admin@tikka.local').toLowerCase();
-  if(!users.some(u=>u.email===adminEmail)) { const password=process.env.ADMIN_PASSWORD||'ChangeMe123!'; users.push({id:id('USR'),name:'Tikka Admin',email:adminEmail,passwordHash:await bcrypt.hash(password,12),role:'admin',createdAt:new Date().toISOString()}); write('users',users); console.log(`Admin created: ${adminEmail}`); }
-  app.listen(PORT,()=>console.log(`Tikka Backend يعمل على http://localhost:${PORT}`));
+(async () => {
+  const users = read('users');
+
+  const adminEmail = (process.env.ADMIN_EMAIL || 'admin@tikka.local').toLowerCase();
+
+  if (!users.some(u => u.email === adminEmail)) {
+    const password = process.env.ADMIN_PASSWORD || 'ChangeMe123!';
+
+    users.push({
+      id: id('USR'),
+      name: 'Tikka Admin',
+      email: adminEmail,
+      passwordHash: await bcrypt.hash(password, 12),
+      role: 'admin',
+      createdAt: new Date().toISOString()
+    });
+
+    write('users', users);
+    console.log(`Admin created: ${adminEmail}`);
+  }
 })();
+
+module.exports = app;
+
+if (require.main === module) {
+  app.listen(PORT, () => {
+    console.log(`Tikka Backend يعمل على http://localhost:${PORT}`);
+  });
+}
